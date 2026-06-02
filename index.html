@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerspectAI — 株式会社渡部製作所</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0e0c;
+    --ink-60: rgba(14,14,12,0.6);
+    --ink-30: rgba(14,14,12,0.3);
+    --ink-10: rgba(14,14,12,0.08);
+    --ink-05: rgba(14,14,12,0.04);
+    --paper: #f7f5f0;
+    --paper-warm: #ede9e0;
+    --accent: #c8793a;
+    --accent-dark: #a05e28;
+    --accent-pale: #f5ede3;
+    --blue-deep: #1b3054;
+    --blue-mid: #2d5086;
+    --emerald: #2e6b4f;
+    --font-display: 'Shippori Mincho', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --panel-w: 400px;
+    --radius: 6px;
+    --radius-lg: 14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid var(--accent);
+    display: grid;
+    place-items: center;
+  }
+  .brand-mark svg { display: block; }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--paper);
+  }
+  .brand-sub {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(247,245,240,0.45);
+    text-transform: uppercase;
+    font-weight: 300;
+    margin-top: 1px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid rgba(247,245,240,0.12);
+    border-radius: 100px;
+    font-size: 11px;
+    color: rgba(247,245,240,0.5);
+    letter-spacing: 0.04em;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4ead78;
+    animation: pulse-green 2s infinite;
+  }
+  @keyframes pulse-green {
+    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(247,245,240,0.15);
+    color: rgba(247,245,240,0.65);
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-ghost:hover { background: rgba(247,245,240,0.07); color: var(--paper); }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .panel-left {
+    width: var(--panel-w);
+    min-width: var(--panel-w);
+    background: #fff;
+    border-right: 1px solid var(--ink-10);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+  }
+
+  .panel-section {
+    padding: 24px;
+    border-bottom: 1px solid var(--ink-10);
+  }
+  .panel-section:last-child { border-bottom: none; }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .step-num {
+    width: 22px;
+    height: 22px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11px;
+    font-weight: 500;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+
+  /* tab toggle */
+  .tab-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--ink-05);
+    border-radius: var(--radius);
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 16px;
+  }
+  .tab-btn {
+    padding: 7px 0;
+    font-size: 12px;
+    font-family: var(--font-body);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--ink-60);
+    font-weight: 400;
+    transition: all 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 500;
+  }
+
+  /* Drawing thumbnails */
+  .drawing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .drawing-card {
+    border: 1.5px solid var(--ink-10);
+    border-radius: var(--radius);
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #fff;
+  }
+  .drawing-card:hover { border-color: var(--accent); }
+  .drawing-card.selected { border-color: var(--ink); background: var(--ink-05); }
+  .drawing-card.selected .draw-name { color: var(--ink); }
+  .drawing-card.wide { grid-column: span 2; display: flex; gap: 12px; align-items: center; }
+  .draw-thumb {
+    aspect-ratio: 4/3;
+    background: #fff;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid var(--ink-10);
+    margin-bottom: 8px;
+    padding: 8px;
+  }
+  .drawing-card.wide .draw-thumb { width: 70px; aspect-ratio: 1; flex-shrink: 0; margin-bottom: 0; }
+  .draw-thumb svg { width: 100%; height: 100%; }
+  .draw-name { font-size: 11px; color: var(--ink-60); font-weight: 400; }
+  .draw-sub { font-size: 10px; color: var(--ink-30); margin-top: 2px; }
+
+  /* Upload area */
+  .upload-zone {
+    border: 1.5px dashed var(--ink-30);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-pale); }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; color: var(--ink-30); }
+  .upload-label { font-size: 12px; color: var(--ink-60); }
+  .upload-sub { font-size: 11px; color: var(--ink-30); margin-top: 3px; }
+
+  /* Style selector */
+  .style-list { display: flex; flex-direction: column; gap: 6px; }
+  .style-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border: 1.5px solid var(--ink-10);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .style-option:hover { border-color: var(--ink-30); }
+  .style-option.selected { border-color: var(--ink); }
+  .style-option.selected::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+  }
+  .style-emoji { font-size: 20px; width: 36px; height: 36px; background: var(--ink-05); border-radius: 4px; display: grid; place-items: center; flex-shrink: 0; }
+  .style-info { flex: 1; }
+  .style-name { font-size: 12px; font-weight: 500; }
+  .style-desc { font-size: 10px; color: var(--ink-60); margin-top: 2px; }
+  .style-check { width: 16px; height: 16px; border: 1.5px solid var(--ink-30); border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; transition: all 0.15s; }
+  .style-option.selected .style-check { background: var(--ink); border-color: var(--ink); }
+  .style-check-inner { width: 6px; height: 6px; border-radius: 50%; background: #fff; display: none; }
+  .style-option.selected .style-check-inner { display: block; }
+
+  /* Options toggles */
+  .opt-label { font-size: 11px; color: var(--ink-60); font-weight: 400; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .toggle-row {
+    display: grid;
+    gap: 4px;
+    background: var(--ink-05);
+    border-radius: var(--radius);
+    padding: 3px;
+    margin-bottom: 14px;
+  }
+  .toggle-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .toggle-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .toggle-btn {
+    padding: 7px 4px;
+    font-size: 11px;
+    font-family: var(--font-body);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--ink-60);
+    transition: all 0.15s;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .toggle-btn.active { background: var(--ink); color: var(--paper); font-weight: 500; }
+
+  .select-native {
+    width: 100%;
+    background: var(--ink-05);
+    border: 1px solid var(--ink-10);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%230e0e0c' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+  .select-native:focus { border-color: var(--ink-60); }
+
+  /* Generate button */
+  .panel-action {
+    padding: 20px 24px;
+    background: #fff;
+    border-top: 1px solid var(--ink-10);
+    position: sticky;
+    bottom: 0;
+  }
+  .btn-generate {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-generate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(200,121,58,0.12));
+  }
+  .btn-generate:hover { background: #1c1c18; transform: translateY(-1px); }
+  .btn-generate:active { transform: translateY(0); }
+  .btn-generate-icon {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+  }
+  .btn-note { font-size: 10px; color: var(--ink-30); text-align: center; margin-top: 8px; letter-spacing: 0.02em; }
+
+  /* ── RIGHT CANVAS ── */
+  .canvas-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Prompt bar */
+  .prompt-bar {
+    background: var(--blue-deep);
+    padding: 12px 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .prompt-bar-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .prompt-bar-icon svg { opacity: 0.7; }
+  .prompt-bar-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+  .prompt-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+  .prompt-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(200,121,58,0.2);
+    color: #f0aa6e;
+    border: 1px solid rgba(200,121,58,0.25);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Main display */
+  .display-area {
+    flex: 1;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+
+  /* Empty state */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    padding: 60px 20px;
+  }
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    border: 1.5px solid var(--ink-10);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--ink-30);
+  }
+  .empty-title { font-family: var(--font-display); font-size: 20px; font-weight: 500; color: var(--ink-60); }
+  .empty-desc { font-size: 13px; color: var(--ink-30); max-width: 340px; line-height: 1.7; }
+
+  /* Loading */
+  .loading-card {
+    background: #fff;
+    border: 1px solid var(--ink-10);
+    border-radius: var(--radius-lg);
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 480px;
+    margin: auto;
+    width: 100%;
+  }
+  .loading-spinner-wrap {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 24px;
+  }
+  .loading-ring {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--ink-10);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-ring-inner {
+    position: absolute;
+    inset: 10px;
+    border: 1.5px solid transparent;
+    border-top-color: var(--blue-mid);
+    border-radius: 50%;
+    animation: spin 1.4s linear infinite reverse;
+  }
+  .loading-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .loading-desc { font-size: 12px; color: var(--ink-60); line-height: 1.65; }
+  .loading-steps {
+    margin-top: 28px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--ink-10);
+    padding-top: 20px;
+  }
+  .lstep {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-30);
+    transition: color 0.3s;
+  }
+  .lstep.active { color: var(--ink); }
+  .lstep.done { color: var(--emerald); }
+  .lstep-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .lstep.active .lstep-num { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .lstep.done .lstep-num { background: var(--emerald); color: #fff; border-color: var(--emerald); }
+  .lstep-ping {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-left: auto;
+    animation: pulse-dot 1s infinite;
+    display: none;
+  }
+  .lstep.active .lstep-ping { display: block; }
+  @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.5} }
+
+  /* Result */
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .result-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #eaf7f0;
+    border: 1px solid #b6e5ce;
+    color: var(--emerald);
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .result-badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+    animation: pulse-green 2s infinite;
+  }
+  .render-time { font-size: 11px; color: var(--ink-30); }
+
+  /* Slider compare */
+  .compare-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--ink-10);
+    cursor: ew-resize;
+    user-select: none;
+  }
+  .before-layer {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+  }
+  .before-layer svg { max-width: 100%; max-height: 100%; }
+  .after-layer {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 0 0 50%);
+    transition: none;
+  }
+  .after-layer img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .divider-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    z-index: 20;
+    pointer-events: none;
+  }
+  .divider-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 38px;
+    height: 38px;
+    background: var(--ink);
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    color: #fff;
+    pointer-events: none;
+  }
+  .compare-label {
+    position: absolute;
+    bottom: 14px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    z-index: 25;
+    pointer-events: none;
+  }
+  .label-before { left: 14px; background: rgba(14,14,12,0.7); color: #fff; }
+  .label-after { right: 14px; background: var(--accent); color: #fff; }
+
+  /* Actions row */
+  .actions-row {
+    background: #fff;
+    border: 1px solid var(--ink-10);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .actions-info { }
+  .actions-info-title { font-size: 13px; font-weight: 500; }
+  .actions-info-sub { font-size: 11px; color: var(--ink-30); margin-top: 3px; }
+  .actions-btns { display: flex; gap: 8px; flex-shrink: 0; }
+  .btn-action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--ink-10);
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    background: #fff;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  .btn-action:hover { border-color: var(--ink-30); background: var(--ink-05); }
+  .btn-action.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn-action.primary:hover { background: #1c1c18; }
+  .btn-action svg { width: 14px; height: 14px; }
+
+  /* Tips banner */
+  .tips-banner {
+    background: var(--accent-pale);
+    border: 1px solid rgba(200,121,58,0.2);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    display: flex;
+    gap: 12px;
+  }
+  .tips-icon { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .tips-title { font-size: 12px; font-weight: 500; color: var(--accent-dark); margin-bottom: 5px; }
+  .tips-text { font-size: 12px; color: var(--ink-60); line-height: 1.65; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(14,14,12,0.75);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    display: none;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 440px;
+    padding: 28px;
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(12px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+  .btn-close { background: none; border: none; cursor: pointer; color: var(--ink-30); padding: 4px; border-radius: 4px; }
+  .btn-close:hover { color: var(--ink); background: var(--ink-05); }
+  .modal-desc { font-size: 12px; color: var(--ink-60); line-height: 1.7; margin-bottom: 20px; }
+  .form-label { font-size: 11px; font-weight: 500; color: var(--ink-60); margin-bottom: 5px; display: block; letter-spacing: 0.04em; }
+  .form-input {
+    width: 100%;
+    border: 1px solid var(--ink-10);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--ink-60); }
+  .form-note { font-size: 10px; color: var(--ink-30); margin-top: 5px; }
+  .modal-footer { margin-top: 24px; display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-save {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius);
+    padding: 9px 20px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-save:hover { background: #1c1c18; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 11px 20px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast-check { color: #4ead78; }
+
+  /* watermark strip */
+  .watermark-strip {
+    background: var(--ink);
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue-deep) 0%, var(--accent) 50%, var(--blue-deep) 100%);
+  }
+
+  /* fade in animation */
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .fade-in { animation: fadeIn 0.35s ease forwards; }
+
+  /* Upload image preview */
+  #upload-preview-section { display: none; }
+  #upload-file-name { font-size: 11px; color: var(--ink-60); }
+  .file-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--ink-05);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    margin-top: 8px;
+  }
+  .btn-remove { background: none; border: none; cursor: pointer; color: var(--ink-30); font-size: 16px; line-height:1; }
+  .btn-remove:hover { color: #c0392b; }
+
+  /* Company logo tag */
+  .co-tag {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(14,14,12,0.65);
+    color: rgba(255,255,255,0.6);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    z-index: 30;
+    pointer-events: none;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+  }
+
+  /* Bottom rule strip */
+  .co-bar {
+    background: var(--ink);
+    padding: 10px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .co-bar-left { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.06em; }
+  .co-bar-right { font-size: 10px; color: rgba(255,255,255,0.25); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+<div class="watermark-strip"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-brand">
+    <div class="brand-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 12L6 5L10 9L12 6L14 12H2Z" stroke="#c8793a" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">PerspectAI</div>
+      <div class="brand-sub">Watanabe Seisakusho · 営業用プロトタイプ</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      システム稼働中
+    </div>
+    <button class="btn-ghost" id="api-config-btn">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 1v1.5M6.5 10.5V12M1 6.5h1.5M10.5 6.5H12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      API 設定
+    </button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <aside class="panel-left">
+
+    <!-- Step 1 -->
+    <div class="panel-section">
+      <div class="section-label">
+        <span class="step-num">1</span>
+        <span class="section-title">設計図面の選択</span>
+      </div>
+
+      <div class="tab-row" id="tab-row">
+        <button class="tab-btn active" id="tab-sample-btn">サンプル図面</button>
+        <button class="tab-btn" id="tab-upload-btn">図面をアップロード</button>
+      </div>
+
+      <!-- Sample drawings -->
+      <div id="sample-pane" class="drawing-grid">
+        <div class="drawing-card selected" id="dc-modern" onclick="selectDrawing('modern')">
+          <div class="draw-thumb">
+            <svg viewBox="0 0 100 80" fill="none" stroke="#0e0e0c" stroke-width="1">
+              <rect x="15" y="40" width="70" height="30"/>
+              <rect x="25" y="15" width="50" height="25"/>
+              <line x1="10" y1="40" x2="90" y2="40"/>
+              <line x1="20" y1="15" x2="80" y2="15"/>
+              <rect x="35" y="45" width="12" height="25"/>
+              <rect x="55" y="48" width="20" height="12"/>
+              <rect x="35" y="22" width="15" height="10"/>
+              <rect x="60" y="22" width="10" height="10"/>
+              <line x1="10" y1="70" x2="90" y2="70" stroke-dasharray="2,2"/>
+            </svg>
+          </div>
+          <div class="draw-name">Modern A棟（立面図）</div>
+        </div>
+        <div class="drawing-card" id="dc-nordic" onclick="selectDrawing('nordic')">
+          <div class="draw-thumb">
+            <svg viewBox="0 0 100 80" fill="none" stroke="#0e0e0c" stroke-width="1">
+              <polygon points="50,10 15,40 85,40"/>
+              <rect x="20" y="40" width="60" height="30"/>
+              <rect x="42" y="48" width="16" height="22"/>
+              <rect x="28" y="48" width="10" height="10"/>
+              <rect x="62" y="48" width="10" height="10"/>
+              <circle cx="50" cy="27" r="4"/>
+              <line x1="10" y1="70" x2="90" y2="70" stroke-dasharray="2,2"/>
+            </svg>
+          </div>
+          <div class="draw-name">Nordic B棟（三角屋根）</div>
+        </div>
+        <div class="drawing-card wide" id="dc-japan" onclick="selectDrawing('japan')">
+          <div class="draw-thumb">
+            <svg viewBox="0 0 120 60" fill="none" stroke="#0e0e0c" stroke-width="0.9">
+              <polygon points="5,20 60,4 115,20"/>
+              <rect x="12" y="20" width="96" height="32"/>
+              <rect x="22" y="28" width="16" height="24"/>
+              <rect x="52" y="27" width="36" height="16"/>
+              <line x1="52" y1="35" x2="88" y2="35"/>
+              <line x1="70" y1="27" x2="70" y2="43"/>
+              <line x1="5" y1="52" x2="115" y2="52" stroke-dasharray="2,2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="draw-name">Japanese 平屋（和風）</div>
+            <div class="draw-sub">ワイドな平屋の間口図面</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload pane -->
+      <div id="upload-pane" style="display:none;">
+        <label class="upload-zone" for="file-input">
+          <div class="upload-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="20" width="24" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M16 4v14M10 9l6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="upload-label">図面をドラッグ＆ドロップ</div>
+          <div class="upload-sub">PNG / JPEG / PDF（最大 20MB）</div>
+          <input type="file" id="file-input" accept="image/*" style="display:none"/>
+        </label>
+        <div id="upload-preview-section">
+          <div class="file-info-row">
+            <span id="upload-file-name">—</span>
+            <button class="btn-remove" id="remove-file">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="panel-section">
+      <div class="section-label">
+        <span class="step-num">2</span>
+        <span class="section-title">デザイン・外観スタイル</span>
+      </div>
+      <div class="style-list" id="style-list">
+        <div class="style-option selected" data-style="modern" onclick="selectStyle(this,'modern')">
+          <div class="style-emoji">🏢</div>
+          <div class="style-info">
+            <div class="style-name">スタイリッシュ・モダン</div>
+            <div class="style-desc">黒ガルバリウム外壁 × 木目の軒天アクセント</div>
+          </div>
+          <div class="style-check"><div class="style-check-inner"></div></div>
+        </div>
+        <div class="style-option" data-style="japanese" onclick="selectStyle(this,'japanese')">
+          <div class="style-emoji">⛩️</div>
+          <div class="style-info">
+            <div class="style-name">和風モダン（ジャパニーズ）</div>
+            <div class="style-desc">白の塗り壁 × 杉無垢の縦格子ルーバー</div>
+          </div>
+          <div class="style-check"><div class="style-check-inner"></div></div>
+        </div>
+        <div class="style-option" data-style="nordic" onclick="selectStyle(this,'nordic')">
+          <div class="style-emoji">🌲</div>
+          <div class="style-info">
+            <div class="style-name">北欧ナチュラル</div>
+            <div class="style-desc">白サイディング × レンガ調タイルのぬくもり</div>
+          </div>
+          <div class="style-check"><div class="style-check-inner"></div></div>
+        </div>
+        <div class="style-option" data-style="california" onclick="selectStyle(this,'california')">
+          <div class="style-emoji">🌊</div>
+          <div class="style-info">
+            <div class="style-name">カリフォルニア・西海岸</div>
+            <div class="style-desc">爽快なブルーのラップサイディング × カバードポーチ</div>
+          </div>
+          <div class="style-check"><div class="style-check-inner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="panel-section">
+      <div class="section-label">
+        <span class="step-num">3</span>
+        <span class="section-title">商談演出の設定</span>
+      </div>
+
+      <div class="opt-label">時間帯・ライティング</div>
+      <div class="toggle-row cols-3" id="lighting-row">
+        <button class="toggle-btn active" onclick="setToggle('lighting','day',this)">昼・青空</button>
+        <button class="toggle-btn" onclick="setToggle('lighting','sunset',this)">夕方・西日</button>
+        <button class="toggle-btn" onclick="setToggle('lighting','night',this)">夜・ライトアップ</button>
+      </div>
+
+      <div class="opt-label">外構（植栽・シンボルツリー）</div>
+      <div class="toggle-row cols-2" id="landscape-row">
+        <button class="toggle-btn active" onclick="setToggle('landscape','rich',this)">豊かな植栽</button>
+        <button class="toggle-btn" onclick="setToggle('landscape','minimal',this)">ミニマル外構</button>
+      </div>
+
+      <div class="opt-label" style="margin-top:14px;">季節感</div>
+      <select class="select-native" id="season-select">
+        <option value="spring">春（新緑・桜が少し舞う明るい風景）</option>
+        <option value="summer" selected>夏（澄み切った青空・強い日差し）</option>
+        <option value="autumn">秋（落ち着いた陽光・紅葉の木々）</option>
+        <option value="winter">冬（透明感あるクールな空気・澄んだ冬空）</option>
+      </select>
+    </div>
+
+    <!-- Generate -->
+    <div class="panel-action">
+      <button class="btn-generate" id="generate-btn">
+        <svg class="btn-generate-icon" viewBox="0 0 18 18" fill="none">
+          <path d="M9 2L10.5 7H15.5L11.5 10.5L13 16L9 12.5L5 16L6.5 10.5L2.5 7H7.5L9 2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="rgba(200,121,58,0.25)"/>
+        </svg>
+        住宅パースを生成する
+      </button>
+      <div class="btn-note">わずか数秒で高品質外観パースを生成します</div>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT CANVAS -->
+  <main class="canvas-right">
+
+    <!-- Prompt bar -->
+    <div class="prompt-bar">
+      <div class="prompt-bar-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="white" stroke-width="1.1"/><path d="M4 7h6M4 4.5h6M4 9.5h4" stroke="white" stroke-width="1" stroke-linecap="round" opacity="0.5"/></svg>
+      </div>
+      <div>
+        <div class="prompt-bar-label">AI 自動最適化プロンプト <span class="prompt-tag">日本街並み対応</span></div>
+        <div class="prompt-text" id="prompt-display">"A high-end modern Japanese house, black metallic vertical siding facade, natural wood grain accents, dynamic mono-pitch roof, sunny summer day, crisp blue sky, lush curated garden, cinematic architectural photography."</div>
+      </div>
+    </div>
+
+    <!-- Display area -->
+    <div class="display-area" id="display-area">
+
+      <!-- Empty state -->
+      <div id="state-empty" class="empty-state">
+        <div class="empty-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="3" y="3" width="22" height="22" rx="3" stroke="currentColor" stroke-width="1.3"/><path d="M3 18l7-7 5 5 3-3 7 7" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg>
+        </div>
+        <div class="empty-title">図面・デザインを選択して生成を開始</div>
+        <div class="empty-desc">左パネルで図面の形状とデザインスタイルを選択し、「住宅パースを生成する」を押してください。数秒で商談用の美しい外観パースが完成します。</div>
+      </div>
+
+      <!-- Loading state -->
+      <div id="state-loading" style="display:none;" class="fade-in">
+        <div class="loading-card">
+          <div class="loading-spinner-wrap">
+            <div class="loading-ring"></div>
+            <div class="loading-ring-inner"></div>
+          </div>
+          <div class="loading-title" id="loading-title">図面の輪郭を解析中…</div>
+          <div class="loading-desc" id="loading-desc">住宅の形状を崩さずパース化するためのエッジ線を抽出しています。</div>
+          <div class="loading-steps">
+            <div class="lstep active" id="lstep-1">
+              <div class="lstep-num">1</div>
+              <span>図面の線画・外形線抽出</span>
+              <div class="lstep-ping"></div>
+            </div>
+            <div class="lstep" id="lstep-2">
+              <div class="lstep-num">2</div>
+              <span>デザイン・環境プロンプト合成</span>
+              <div class="lstep-ping"></div>
+            </div>
+            <div class="lstep" id="lstep-3">
+              <div class="lstep-num">3</div>
+              <span>AI 高精度パースレンダリング</span>
+              <div class="lstep-ping"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result state -->
+      <div id="state-result" style="display:none;" class="fade-in">
+
+        <div class="result-header">
+          <div class="result-badge">
+            <span class="result-badge-dot"></span>
+            高精細 3D パース生成完了
+          </div>
+          <span class="render-time" id="render-time">生成時間: 5.4秒</span>
+        </div>
+
+        <div class="compare-wrap" id="compare-wrap">
+          <div class="before-layer" id="before-layer">
+            <div id="before-svg-container"></div>
+          </div>
+          <div class="after-layer" id="after-layer">
+            <img id="after-img" src="" alt="生成パース">
+          </div>
+          <div class="divider-line" id="divider-line"></div>
+          <div class="divider-knob" id="divider-knob">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7H10M4 7L2 5M4 7L2 9M10 7L12 5M10 7L12 9" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="compare-label label-before">BEFORE — 設計図面</div>
+          <div class="compare-label label-after">AFTER — 完成パース</div>
+          <div class="co-tag">渡部製作所 × PerspectAI</div>
+        </div>
+
+        <div class="actions-row">
+          <div class="actions-info">
+            <div class="actions-info-title">パース画像が出力されました。商談提案にご活用ください。</div>
+            <div class="actions-info-sub">※ 本パースは商談時の外観検討を目的としてAIが自動推論したイメージです。</div>
+          </div>
+          <div class="actions-btns">
+            <button class="btn-action" onclick="doDownload()">
+              <svg viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4 6l3 3 3-3M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              画像保存
+            </button>
+            <button class="btn-action" onclick="doShare()">
+              <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="5" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M8 7h4M10 5l2 2-2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              リンク共有
+            </button>
+            <button class="btn-action primary" onclick="regenerate()">
+              <svg viewBox="0 0 14 14" fill="none"><path d="M2 7a5 5 0 105 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 4.5V7H4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              バリエーション生成
+            </button>
+          </div>
+        </div>
+
+        <div class="tips-banner">
+          <div class="tips-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M9 8v5M9 5.5v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="tips-title">営業トーク活用ヒント</div>
+            <div class="tips-text">お客様とタブレット画面を一緒に見ながら「外観を黒いガルバリウムに変更するとどうですか？」「夜のライティングはどう見えますか？」とその場で切り替えを行い、AIパースをわずか数秒で見せることで、他社との圧倒的な意思決定スピードの差を生み出します。</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="co-bar">
+      <div class="co-bar-left">株式会社渡部製作所 — 札幌市清田区 — 営業用 PoC デモ v1.0</div>
+      <div class="co-bar-right">PerspectAI · Powered by AI Image Generation</div>
+    </div>
+
+  </main>
+</div><!-- /.layout -->
+
+<!-- API Modal -->
+<div class="modal-overlay" id="api-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">AI 連携 · API 設定</div>
+      <button class="btn-close" id="close-modal">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-desc">
+      APIキーを入力すると Imagen 4.0 によるリアルタイム高解像度パースを生成できます。空欄の場合は高品質な模擬パース（全スタイル・環境差分対応）が表示されます。
+    </div>
+    <div style="margin-bottom:14px;">
+      <label class="form-label">Gemini / Vertex AI APIキー</label>
+      <input type="password" id="api-key-input" class="form-input" placeholder="AI-zaSy...">
+      <div class="form-note">入力されたキーはブラウザ内のみで使用され、サーバーには保存されません。</div>
+    </div>
+    <div>
+      <label class="form-label">画像生成解像度</label>
+      <select class="select-native" id="resolution-select">
+        <option value="1:1">正方形（1024×1024）</option>
+        <option value="4:3" selected>スタンダード（1024×768 — タブレット最適）</option>
+        <option value="16:9">ワイド（1280×720）</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" id="save-api">設定を保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-check">✓</span>
+  <span id="toast-text">完了しました</span>
+</div>
+
+<canvas id="cv-canvas" style="display:none;"></canvas>
+
+<script>
+// ── STATE ──
+let state = {
+  drawing: 'modern',
+  style: 'modern',
+  lighting: 'day',
+  landscape: 'rich',
+  season: 'summer',
+  uploadedBase64: null,
+  apiKey: '',
+};
+
+// Mock architectural images (Unsplash)
+const MOCKS = {
+  modern:{
+    day:{rich:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85'},
+    sunset:{rich:'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85'},
+    night:{rich:'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=85'}
+  },
+  japanese:{
+    day:{rich:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85'},
+    sunset:{rich:'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=85'},
+    night:{rich:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=1200&q=85'}
+  },
+  nordic:{
+    day:{rich:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=85'},
+    sunset:{rich:'https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=85'},
+    night:{rich:'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85'}
+  },
+  california:{
+    day:{rich:'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85'},
+    sunset:{rich:'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1512914890251-2f96a9b0bbe2?auto=format&fit=crop&w=1200&q=85'},
+    night:{rich:'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1602941525421-8f8b81d3edbb?auto=format&fit=crop&w=1200&q=85'}
+  }
+};
+
+// SVG factories
+const SVGS = {
+  modern:`<svg viewBox="0 0 100 80" fill="none" stroke="#1b3054" stroke-width="0.8"><rect x="15" y="40" width="70" height="30"/><rect x="25" y="15" width="50" height="25"/><line x1="10" y1="40" x2="90" y2="40"/><line x1="20" y1="15" x2="80" y2="15"/><rect x="35" y="45" width="12" height="25"/><rect x="55" y="48" width="20" height="12"/><rect x="35" y="22" width="15" height="10"/><rect x="60" y="22" width="10" height="10"/><line x1="5" y1="70" x2="95" y2="70" stroke-dasharray="2,2" stroke-opacity="0.35"/><text x="50" y="77" text-anchor="middle" font-size="4" fill="#888" font-family="sans-serif">ELEVATION — Modern Type A</text></svg>`,
+  nordic:`<svg viewBox="0 0 100 80" fill="none" stroke="#1b3054" stroke-width="0.8"><polygon points="50,10 15,40 85,40"/><rect x="20" y="40" width="60" height="30"/><rect x="42" y="48" width="16" height="22"/><rect x="28" y="48" width="10" height="10"/><rect x="62" y="48" width="10" height="10"/><circle cx="50" cy="27" r="4"/><line x1="5" y1="70" x2="95" y2="70" stroke-dasharray="2,2" stroke-opacity="0.35"/><text x="50" y="77" text-anchor="middle" font-size="4" fill="#888" font-family="sans-serif">ELEVATION — Nordic Type B</text></svg>`,
+  japan:`<svg viewBox="0 0 130 65" fill="none" stroke="#1b3054" stroke-width="0.7"><polygon points="5,22 65,4 125,22"/><rect x="10" y="22" width="110" height="34"/><rect x="20" y="31" width="18" height="25"/><rect x="58" y="29" width="40" height="18"/><line x1="58" y1="38" x2="98" y2="38"/><line x1="78" y1="29" x2="78" y2="47"/><line x1="5" y1="56" x2="125" y2="56" stroke-dasharray="2,2" stroke-opacity="0.35"/><text x="65" y="63" text-anchor="middle" font-size="4" fill="#888" font-family="sans-serif">ELEVATION — Japanese Flat House</text></svg>`
+};
+
+// ── TAB SWITCHING ──
+document.getElementById('tab-sample-btn').addEventListener('click',()=>{
+  document.getElementById('tab-sample-btn').classList.add('active');
+  document.getElementById('tab-upload-btn').classList.remove('active');
+  document.getElementById('sample-pane').style.display='grid';
+  document.getElementById('upload-pane').style.display='none';
+});
+document.getElementById('tab-upload-btn').addEventListener('click',()=>{
+  document.getElementById('tab-upload-btn').classList.add('active');
+  document.getElementById('tab-sample-btn').classList.remove('active');
+  document.getElementById('sample-pane').style.display='none';
+  document.getElementById('upload-pane').style.display='block';
+});
+
+// ── DRAWING SELECT ──
+function selectDrawing(id) {
+  state.drawing = id;
+  state.uploadedBase64 = null;
+  document.querySelectorAll('.drawing-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('dc-'+id).classList.add('selected');
+  updateBeforeLayer();
+  updatePrompt();
+}
+
+function updateBeforeLayer() {
+  const c = document.getElementById('before-svg-container');
+  if (!c) return;
+  const svgKey = state.drawing === 'modern' ? 'modern' : state.drawing === 'nordic' ? 'nordic' : 'japan';
+  if (state.uploadedBase64) {
+    c.innerHTML = `<img src="${state.uploadedBase64}" style="max-width:100%;max-height:280px;object-fit:contain;border-radius:4px;" />`;
+  } else {
+    c.innerHTML = SVGS[svgKey];
+    const svg = c.querySelector('svg');
+    if (svg) { svg.style.maxWidth='100%'; svg.style.maxHeight='280px'; }
+  }
+}
+
+// ── FILE UPLOAD ──
+document.getElementById('file-input').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('upload-file-name').textContent = file.name;
+  document.getElementById('upload-preview-section').style.display='block';
+  const r = new FileReader();
+  r.onload = ev => {
+    state.uploadedBase64 = ev.target.result;
+    updateBeforeLayer();
+  };
+  r.readAsDataURL(file);
+});
+document.getElementById('remove-file').addEventListener('click', ()=>{
+  document.getElementById('file-input').value='';
+  document.getElementById('upload-preview-section').style.display='none';
+  state.uploadedBase64=null;
+  selectDrawing(state.drawing);
+});
+
+// ── STYLE SELECT ──
+function selectStyle(el, id) {
+  state.style = id;
+  document.querySelectorAll('.style-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  updatePrompt();
+}
+
+// ── TOGGLE BUTTONS ──
+function setToggle(group, val, el) {
+  state[group] = val;
+  const row = el.closest('.toggle-row');
+  row.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  updatePrompt();
+}
+document.getElementById('season-select').addEventListener('change', e=>{
+  state.season = e.target.value;
+  updatePrompt();
+});
+
+// ── PROMPT GENERATION ──
+function buildPrompt() {
+  let p = 'A highly detailed architectural visualization of a luxury ';
+  const styleMap = {
+    modern: 'contemporary Japanese house. Black metallic matte vertical siding, sleek natural teak wood soffit accents, flat mono-pitch metal roof.',
+    japanese: 'wabi-sabi modern Japanese house. Light shikkui plaster walls, vertical cedar wooden slat screens, traditional dark ceramic tile roof.',
+    nordic: 'Nordic Scandinavian house. Off-white wood panel siding, warm brick accent chimney, high-pitched gabled roof, minimalist black-framed windows.',
+    california: 'coastal California beach house. Pale ocean blue horizontal wooden siding, white covered porch veranda, glass balustrades.'
+  };
+  p += styleMap[state.style] + ' ';
+  const lightMap = {
+    day: 'Bright mid-day sunlight, crisp blue sky, sharp cast shadows.',
+    sunset: 'Dramatic warm sunset glow, golden hour shadows, orange and pink clouds.',
+    night: 'Elegant evening scene, exterior architectural spotlighting, warm glow from indoor windows.'
+  };
+  p += lightMap[state.lighting] + ' ';
+  const landMap = {
+    rich: 'Lush curated garden with a tall symbolic maple tree, stone pavement driveway, pathway lighting.',
+    minimal: 'Sleek concrete driveway, minimalist landscape, single statement pine shrub.'
+  };
+  p += landMap[state.landscape] + ' ';
+  const seasonMap = {
+    spring: 'Spring morning, fresh green leaves, subtle cherry blossom petals.',
+    summer: 'Bright lush summer, rich green foliage, intense clean sunlight.',
+    autumn: 'Gentle autumn, warm lighting, gold and crimson leaves.',
+    winter: 'Crisp winter sky, bare branches, cold morning air.'
+  };
+  p += seasonMap[state.season] + ' Photorealistic, 35mm architectural photography, sharp focus.';
+  return p;
+}
+
+function updatePrompt() {
+  document.getElementById('prompt-display').textContent = '"' + buildPrompt() + '"';
+}
+updatePrompt();
+
+// ── SLIDER COMPARE ──
+let sliderDragging = false;
+function setSliderPos(pct) {
+  pct = Math.max(0, Math.min(100, pct));
+  document.getElementById('after-layer').style.clipPath = `inset(0 0 0 ${pct}%)`;
+  document.getElementById('divider-line').style.left = pct + '%';
+  document.getElementById('divider-knob').style.left = pct + '%';
+}
+
+const cw = document.getElementById('compare-wrap');
+if (cw) {
+  cw.addEventListener('mousedown', e => { sliderDragging=true; moveSlider(e); });
+  cw.addEventListener('touchstart', e => { sliderDragging=true; if(e.touches[0]) moveSlider(e.touches[0]); });
+}
+document.addEventListener('mouseup', ()=>{ sliderDragging=false; });
+document.addEventListener('touchend', ()=>{ sliderDragging=false; });
+document.addEventListener('mousemove', e=>{ if(sliderDragging) moveSlider(e); });
+document.addEventListener('touchmove', e=>{ if(sliderDragging&&e.touches[0]) moveSlider(e.touches[0]); });
+
+function moveSlider(e) {
+  const wrap = document.getElementById('compare-wrap');
+  if (!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const pct = ((e.clientX - rect.left) / rect.width) * 100;
+  setSliderPos(pct);
+}
+
+// ── GENERATE ──
+document.getElementById('generate-btn').addEventListener('click', async ()=>{
+  const se = document.getElementById('state-empty');
+  const sl = document.getElementById('state-loading');
+  const sr = document.getElementById('state-result');
+  se.style.display='none'; sr.style.display='none'; sl.style.display='block';
+  sl.classList.remove('fade-in'); void sl.offsetWidth; sl.classList.add('fade-in');
+  resetSteps();
+
+  const t0 = Date.now();
+  await simulateStep1();
+  advanceStep(1,2,'デザインプロンプト合成中…','Gemini 2.5 Flash が希望の外壁材・時間帯などの詳細プロンプトを構築しています。');
+  await sleep(1400);
+  advanceStep(2,3,'AI 高精度パースレンダリング中…','Imagen 4.0 を起動。外壁・空・植栽などを超高精細に合成しています。');
+  await sleep(state.apiKey ? 0 : 2200);
+
+  const imgUrl = getMockImage();
+  document.getElementById('after-img').src = imgUrl;
+  updateBeforeLayer();
+  setSliderPos(50);
+  const elapsed = ((Date.now()-t0)/1000).toFixed(1);
+  document.getElementById('render-time').textContent = `生成時間: ${elapsed}秒`;
+
+  doneStep(3);
+  await sleep(300);
+  sl.style.display='none';
+  sr.style.display='block';
+  sr.classList.remove('fade-in'); void sr.offsetWidth; sr.classList.add('fade-in');
+});
+
+function getMockImage() {
+  const sg = MOCKS[state.style]||MOCKS.modern;
+  const lg = sg[state.lighting]||sg.day;
+  return lg[state.landscape]||lg.rich;
+}
+
+function resetSteps() {
+  ['lstep-1','lstep-2','lstep-3'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.className='lstep';
+  });
+  document.getElementById('lstep-1').classList.add('active');
+  document.getElementById('loading-title').textContent='図面の輪郭を解析中…';
+  document.getElementById('loading-desc').textContent='住宅の形状を崩さずパース化するためのエッジ線を抽出しています。';
+}
+function advanceStep(from, to, title, desc) {
+  doneStep(from);
+  const el = document.getElementById('lstep-'+to);
+  el.classList.add('active');
+  document.getElementById('loading-title').textContent=title;
+  document.getElementById('loading-desc').textContent=desc;
+}
+function doneStep(n) {
+  const el = document.getElementById('lstep-'+n);
+  el.classList.remove('active'); el.classList.add('done');
+  el.querySelector('.lstep-num').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+async function simulateStep1() {
+  return new Promise(resolve=>{
+    const canvas = document.getElementById('cv-canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.crossOrigin='anonymous';
+    const svgKey = state.drawing==='modern'?'modern':state.drawing==='nordic'?'nordic':'japan';
+    const svgStr = SVGS[svgKey];
+    img.src = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
+    img.onload=()=>{ canvas.width=400;canvas.height=300;ctx.drawImage(img,0,0,400,300);setTimeout(resolve,1200); };
+    img.onerror=()=>setTimeout(resolve,1200);
+  });
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ── ACTION BUTTONS ──
+function doDownload() {
+  const src = document.getElementById('after-img').src;
+  if (!src) return;
+  const a = document.createElement('a');
+  a.href=src;
+  a.download=`PerspectAI_${state.style}_${state.lighting}.jpg`;
+  a.click();
+  toast('画像をローカルに保存しました。');
+}
+function doShare() {
+  navigator.clipboard?.writeText(window.location.href).catch(()=>{});
+  toast('共有リンクをクリップボードにコピーしました！');
+}
+function regenerate() {
+  document.getElementById('generate-btn').click();
+}
+
+// ── API MODAL ──
+document.getElementById('api-config-btn').addEventListener('click',()=>{
+  document.getElementById('api-key-input').value=state.apiKey;
+  document.getElementById('api-modal').classList.add('open');
+});
+document.getElementById('close-modal').addEventListener('click',()=>{
+  document.getElementById('api-modal').classList.remove('open');
+});
+document.getElementById('save-api').addEventListener('click',()=>{
+  state.apiKey=document.getElementById('api-key-input').value.trim();
+  document.getElementById('api-modal').classList.remove('open');
+  toast(state.apiKey?'Gemini API キーを設定しました。':'APIキーをクリアしました。模擬モードで動作します。');
+});
+document.getElementById('api-modal').addEventListener('click',e=>{
+  if(e.target===e.currentTarget) document.getElementById('api-modal').classList.remove('open');
+});
+
+// ── TOAST ──
+function toast(msg) {
+  const el=document.getElementById('toast');
+  document.getElementById('toast-text').textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',()=>{
+  updateBeforeLayer();
+});
+</script>
+</body>
+</html>
