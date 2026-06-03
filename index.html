@@ -1295,6 +1295,7 @@ function selectDrawing(id) {
   document.getElementById('dc-' + id).classList.add('selected');
   updateBeforeLayer();
   updatePrompt();
+  liveUpdateAfterImage();
 }
 
 function updateBeforeLayer() {
@@ -1460,22 +1461,25 @@ document.getElementById('remove-file').addEventListener('click', () => {
 // ── STYLE SELECT ──
 function selectStyle(el, id) {
   state.style = id;
-  document.querySelectorAll('.style-option').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   updatePrompt();
+  liveUpdateAfterImage();
 }
 
 // ── TOGGLE BUTTONS ──
 function setToggle(group, val, el) {
   state[group] = val;
   const row = el.closest('.toggle-row');
-  row.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  row.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   updatePrompt();
+  liveUpdateAfterImage();
 }
-document.getElementById('season-select').addEventListener('change', e=>{
+document.getElementById('season-select').addEventListener('change', e => {
   state.season = e.target.value;
   updatePrompt();
+  liveUpdateAfterImage();
 });
 
 // ── PROMPT GENERATION ──
@@ -1779,9 +1783,12 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
   updateBeforeLayer();
   setSliderPos(50);
 
+  const styleNames = { modern:'スタイリッシュ・モダン', japanese:'和風モダン', nordic:'北欧ナチュラル', california:'カリフォルニア' };
+  const lightNames = { day:'昼・青空', sunset:'夕方・西日', night:'夜・ライトアップ' };
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
-  const visionLabel = useVision && state.visionAnalysis ? ' (Vision 解析込み)' : '';
-  document.getElementById('render-time').textContent = `生成時間: ${elapsed}秒${visionLabel}`;
+  const visionLabel = useVision && state.visionAnalysis ? ' — Vision 解析済' : '';
+  document.getElementById('render-time').textContent =
+    `${styleNames[state.style]} / ${lightNames[state.lighting]} — ${elapsed}秒${visionLabel}`;
 
   doneStep(3);
   await sleep(300);
@@ -1789,6 +1796,13 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
   sr.style.display = 'block';
   sr.classList.remove('fade-in'); void sr.offsetWidth; sr.classList.add('fade-in');
 });
+
+// 結果画面が既に表示中なら After 画像をリアルタイム更新
+function liveUpdateAfterImage() {
+  const sr = document.getElementById('state-result');
+  if (sr.style.display === 'none' || sr.style.display === '') return;
+  document.getElementById('after-img').src = getMockImage();
+}
 
 function getMockImage() {
   const sg = MOCKS[state.style] || MOCKS.modern;
@@ -1924,9 +1938,23 @@ function toast(msg) {
 }
 
 // ── INIT ──
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded', () => {
   updateBeforeLayer();
+  updatePrompt();
+  showInitialResult();
 });
+
+function showInitialResult() {
+  const imgUrl = getMockImage();
+  document.getElementById('after-img').src = imgUrl;
+  updateBeforeLayer();
+  setSliderPos(50);
+  document.getElementById('render-time').textContent = 'Modern A棟 — スタイリッシュ・モダン / 昼・夏';
+
+  document.getElementById('state-empty').style.display   = 'none';
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('state-result').style.display  = 'block';
+}
 </script>
 </body>
 </html>
