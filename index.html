@@ -1125,17 +1125,17 @@
             <div class="actions-info-sub">※ 本パースは商談時の外観検討を目的としてAIが自動推論したイメージです。</div>
           </div>
           <div class="actions-btns">
-            <button class="btn-action" onclick="doDownload()">
+            <button class="btn-action" id="btn-save-jpeg" onclick="doSaveJpeg()">
               <svg viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4 6l3 3 3-3M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              画像保存
+              JPEG 保存
             </button>
-            <button class="btn-action" onclick="doShare()">
-              <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="5" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M8 7h4M10 5l2 2-2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              リンク共有
+            <button class="btn-action primary" id="btn-save-pdf" onclick="doSavePdf()">
+              <svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4h6M4 7h6M4 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              PDF 提案書を出力
             </button>
-            <button class="btn-action primary" onclick="regenerate()">
+            <button class="btn-action" onclick="regenerate()">
               <svg viewBox="0 0 14 14" fill="none"><path d="M2 7a5 5 0 105 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 4.5V7H4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              バリエーション生成
+              再生成
             </button>
           </div>
         </div>
@@ -1225,8 +1225,10 @@ if (typeof pdfjsLib !== 'undefined') {
 }
 </script>
 
+<!-- jsPDF for PDF proposal export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-// ── STATE ──
 let state = {
   drawing: 'modern',
   style: 'modern',
@@ -1240,27 +1242,63 @@ let state = {
   visionAnalysis: null, // Claude が解析した図面情報（構造化JSON）
 };
 
-// Mock architectural images (Unsplash)
+// Mock architectural images — 高品質・スタイル厳密対応（1600px）
 const MOCKS = {
   modern:{
-    day:{rich:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85'},
-    sunset:{rich:'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85'},
-    night:{rich:'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=85'}
+    day:{
+      rich:   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=92'
+    },
+    sunset:{
+      rich:   'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=92'
+    },
+    night:{
+      rich:   'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=92'
+    }
   },
   japanese:{
-    day:{rich:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85'},
-    sunset:{rich:'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=85'},
-    night:{rich:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=1200&q=85'}
+    day:{
+      rich:   'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=92'
+    },
+    sunset:{
+      rich:   'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1600&q=92'
+    },
+    night:{
+      rich:   'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=92'
+    }
   },
   nordic:{
-    day:{rich:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=85'},
-    sunset:{rich:'https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=85'},
-    night:{rich:'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85'}
+    day:{
+      rich:   'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1600&q=92'
+    },
+    sunset:{
+      rich:   'https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1600&q=92'
+    },
+    night:{
+      rich:   'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=92'
+    }
   },
   california:{
-    day:{rich:'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85'},
-    sunset:{rich:'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1512914890251-2f96a9b0bbe2?auto=format&fit=crop&w=1200&q=85'},
-    night:{rich:'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85',minimal:'https://images.unsplash.com/photo-1602941525421-8f8b81d3edbb?auto=format&fit=crop&w=1200&q=85'}
+    day:{
+      rich:   'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=92'
+    },
+    sunset:{
+      rich:   'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1512914890251-2f96a9b0bbe2?auto=format&fit=crop&w=1600&q=92'
+    },
+    night:{
+      rich:   'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=92',
+      minimal:'https://images.unsplash.com/photo-1602941525421-8f8b81d3edbb?auto=format&fit=crop&w=1600&q=92'
+    }
   }
 };
 
@@ -1323,7 +1361,7 @@ async function handleFile(file) {
     return;
   }
 
-  const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  const isPDF   = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
   const isImage = file.type.startsWith('image/');
 
   if (!isPDF && !isImage) {
@@ -1332,15 +1370,27 @@ async function handleFile(file) {
   }
 
   // UI更新
-  const fileIcon = isPDF ? '📋' : '🖼️';
-  document.getElementById('upload-file-icon').textContent = fileIcon;
+  document.getElementById('upload-file-icon').textContent = isPDF ? '📋' : '🖼️';
   document.getElementById('upload-file-name').textContent = file.name;
   document.getElementById('upload-preview-section').style.display = 'block';
+
+  // サンプル図面の選択状態を解除（視覚的に「アップロード優先」を示す）
+  document.querySelectorAll('.drawing-card').forEach(c => c.classList.remove('selected'));
 
   if (isPDF) {
     await processPDF(file);
   } else {
     await processImage(file);
+  }
+
+  // アップロード完了 → BeforeレイヤーとAfterを即時更新
+  if (state.uploadedBase64) {
+    updateBeforeLayer();
+    // 結果画面が出ていれば Before も After も同期
+    const sr = document.getElementById('state-result');
+    if (sr.style.display !== 'none') {
+      liveUpdateAfterImage();
+    }
   }
 
   // Anthropic APIキーが設定済みなら図面を即座に解析
@@ -1355,7 +1405,6 @@ function processImage(file) {
     const reader = new FileReader();
     reader.onload = ev => {
       state.uploadedBase64 = ev.target.result;
-      updateBeforeLayer();
       resolve();
     };
     reader.onerror = () => { toast('画像の読み込みに失敗しました。'); reject(); };
@@ -1409,8 +1458,6 @@ async function processPDF(file) {
     msgEl.textContent = `変換完了（全 ${totalPages} ページ中 1 ページ目を表示）`;
     setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
 
-    updateBeforeLayer();
-
     if (totalPages > 1) {
       toast(`PDF ${totalPages}ページを読み込みました。1ページ目を図面として使用します。`);
     } else {
@@ -1455,7 +1502,17 @@ document.getElementById('remove-file').addEventListener('click', () => {
   document.getElementById('pdf-render-status').style.display = 'none';
   state.uploadedBase64 = null;
   state.uploadedPageCount = null;
-  selectDrawing(state.drawing);
+  state.visionAnalysis = null;
+  applyVisionAnalysis(null);
+
+  // サンプル図面（現在の drawing）を再選択状態に戻す
+  document.querySelectorAll('.drawing-card').forEach(c => c.classList.remove('selected'));
+  const activeCard = document.getElementById('dc-' + state.drawing);
+  if (activeCard) activeCard.classList.add('selected');
+
+  updateBeforeLayer();
+  updatePrompt();
+  liveUpdateAfterImage();
 });
 
 // ── STYLE SELECT ──
@@ -1800,8 +1857,11 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
 // 結果画面が既に表示中なら After 画像をリアルタイム更新
 function liveUpdateAfterImage() {
   const sr = document.getElementById('state-result');
-  if (sr.style.display === 'none' || sr.style.display === '') return;
+  // display が 'none' 以外（'block' または未設定だが初期表示済み）なら更新
+  if (sr.style.display === 'none') return;
   document.getElementById('after-img').src = getMockImage();
+  // Beforeレイヤーも最新状態に同期
+  updateBeforeLayer();
 }
 
 function getMockImage() {
@@ -1864,35 +1924,259 @@ function doneStep(n) {
 }
 
 async function simulateStep1() {
-  return new Promise(resolve=>{
+  return new Promise(resolve => {
     const canvas = document.getElementById('cv-canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    img.crossOrigin='anonymous';
-    const svgKey = state.drawing==='modern'?'modern':state.drawing==='nordic'?'nordic':'japan';
-    const svgStr = SVGS[svgKey];
-    img.src = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
-    img.onload=()=>{ canvas.width=400;canvas.height=300;ctx.drawImage(img,0,0,400,300);setTimeout(resolve,1200); };
-    img.onerror=()=>setTimeout(resolve,1200);
+    img.crossOrigin = 'anonymous';
+
+    // アップロード画像があればそれを使う、なければサンプルSVG
+    if (state.uploadedBase64) {
+      img.src = state.uploadedBase64;
+    } else {
+      const svgKey = state.drawing === 'modern' ? 'modern' : state.drawing === 'nordic' ? 'nordic' : 'japan';
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SVGS[svgKey]);
+    }
+    img.onload = () => {
+      canvas.width = 400; canvas.height = 300;
+      ctx.drawImage(img, 0, 0, 400, 300);
+      setTimeout(resolve, 1200);
+    };
+    img.onerror = () => setTimeout(resolve, 1200);
   });
 }
 
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 // ── ACTION BUTTONS ──
-function doDownload() {
+
+// 外部URLの画像をCanvasに描画してBlobとして取得（クロスオリジン対応）
+async function fetchImageAsBlob(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.naturalWidth  || 1200;
+      canvas.height = img.naturalHeight || 900;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(blob => {
+        if (blob) resolve(blob);
+        else reject(new Error('canvas.toBlob failed'));
+      }, 'image/jpeg', 0.93);
+    };
+    img.onerror = () => {
+      // crossOriginフラグなしで再試行（一部CDNがcors拒否する場合のフォールバック）
+      const img2 = new Image();
+      img2.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width  = img2.naturalWidth  || 1200;
+        canvas.height = img2.naturalHeight || 900;
+        canvas.getContext('2d').drawImage(img2, 0, 0);
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('fallback failed')), 'image/jpeg', 0.93);
+      };
+      img2.onerror = () => reject(new Error('Image load failed'));
+      img2.src = url;
+    };
+    img.src = url;
+  });
+}
+
+// JPEG 保存
+async function doSaveJpeg() {
+  const btn = document.getElementById('btn-save-jpeg');
   const src = document.getElementById('after-img').src;
-  if (!src) return;
-  const a = document.createElement('a');
-  a.href=src;
-  a.download=`PerspectAI_${state.style}_${state.lighting}.jpg`;
-  a.click();
-  toast('画像をローカルに保存しました。');
+  if (!src) { toast('パース画像がありません。まず生成してください。'); return; }
+
+  btn.textContent = '保存中…'; btn.disabled = true;
+  try {
+    const blob = await fetchImageAsBlob(src);
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const styleNames = { modern:'modern', japanese:'japanese', nordic:'nordic', california:'california' };
+    a.href     = url;
+    a.download = `PerspectAI_${styleNames[state.style]}_${state.lighting}_${state.season}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('JPEG 画像を保存しました。');
+  } catch (e) {
+    console.error(e);
+    // フォールバック：href 直接ダウンロード
+    const a = document.createElement('a');
+    a.href = src; a.download = 'PerspectAI_perse.jpg'; a.target = '_blank';
+    a.click();
+    toast('画像リンクを開きました。右クリック→名前を付けて保存してください。');
+  } finally {
+    btn.innerHTML = '<svg viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4 6l3 3 3-3M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg> JPEG 保存';
+    btn.disabled = false;
+  }
 }
-function doShare() {
-  navigator.clipboard?.writeText(window.location.href).catch(()=>{});
-  toast('共有リンクをクリップボードにコピーしました！');
+
+// PDF 提案書出力
+async function doSavePdf() {
+  const btn = document.getElementById('btn-save-pdf');
+  const src = document.getElementById('after-img').src;
+  if (!src) { toast('パース画像がありません。まず生成してください。'); return; }
+  if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
+    toast('PDF ライブラリの読み込みに失敗しました。ページを再読み込みしてください。');
+    return;
+  }
+
+  btn.textContent = 'PDF 生成中…'; btn.disabled = true;
+
+  try {
+    const blob     = await fetchImageAsBlob(src);
+    const imgDataUrl = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload  = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(blob);
+    });
+
+    // jsPDF インスタンス生成
+    const { jsPDF } = window.jspdf || window;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const PW = 210; // A4 width mm
+    const PH = 297; // A4 height mm
+    const M  = 14;  // margin
+
+    // ── ヘッダー帯 ──
+    doc.setFillColor(14, 14, 12);
+    doc.rect(0, 0, PW, 22, 'F');
+
+    // ロゴテキスト
+    doc.setTextColor(247, 245, 240);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PerspectAI', M, 13);
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(200, 121, 58);
+    doc.text('株式会社渡部製作所', M + 42, 13);
+
+    // 日付（右寄せ）
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+    doc.setTextColor(180, 175, 165);
+    doc.setFontSize(8);
+    doc.text(dateStr, PW - M, 13, { align: 'right' });
+
+    // ── タイトルブロック ──
+    doc.setTextColor(14, 14, 12);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('外観パース提案書', M, 36);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 95, 88);
+    doc.text('AI による高精細外観イメージ — 商談用参考資料', M, 43);
+
+    // 区切り線（アクセントカラー）
+    doc.setDrawColor(200, 121, 58);
+    doc.setLineWidth(0.6);
+    doc.line(M, 47, PW - M, 47);
+
+    // ── 設定サマリー（2列） ──
+    const styleLabel  = { modern:'スタイリッシュ・モダン', japanese:'和風モダン', nordic:'北欧ナチュラル', california:'カリフォルニア' };
+    const lightLabel  = { day:'昼・青空', sunset:'夕方・西日', night:'夜・ライトアップ' };
+    const landLabel   = { rich:'豊かな植栽', minimal:'ミニマル外構' };
+    const seasonLabel = { spring:'春', summer:'夏', autumn:'秋', winter:'冬' };
+
+    const specs = [
+      ['デザインスタイル', styleLabel[state.style]  || state.style],
+      ['時間帯・光源',     lightLabel[state.lighting] || state.lighting],
+      ['外構・植栽',       landLabel[state.landscape] || state.landscape],
+      ['季節感',           seasonLabel[state.season]  || state.season],
+    ];
+
+    doc.setFontSize(8.5);
+    let sy = 54;
+    specs.forEach(([k, v], i) => {
+      const cx = i % 2 === 0 ? M : PW / 2 + 4;
+      if (i % 2 === 0 && i > 0) sy += 9;
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(140, 130, 118);
+      doc.text(k, cx, sy);
+      doc.setFont('helvetica', 'bold');   doc.setTextColor(14, 14, 12);
+      doc.text(v, cx + 28, sy);
+    });
+    sy += 9;
+
+    // Vision解析バッジ
+    if (state.visionAnalysis) {
+      doc.setFillColor(240, 248, 244);
+      doc.roundedRect(M, sy, PW - M * 2, 9, 1.5, 1.5, 'F');
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(46, 107, 79);
+      doc.text('✦ Claude Vision 図面解析済', M + 4, sy + 6);
+      if (state.visionAnalysis.roof_type) {
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 120, 95);
+        doc.text(`屋根: ${state.visionAnalysis.roof_type}  /  ${state.visionAnalysis.stories}  /  信頼度: ${state.visionAnalysis.confidence}`, M + 70, sy + 6);
+      }
+      sy += 13;
+    }
+
+    // ── パース画像 ──
+    const imgY  = sy + 4;
+    const imgW  = PW - M * 2;
+    const imgH  = imgW * (9 / 16); // 16:9比率
+    doc.addImage(imgDataUrl, 'JPEG', M, imgY, imgW, imgH, '', 'FAST');
+
+    // 画像枠線
+    doc.setDrawColor(200, 195, 185);
+    doc.setLineWidth(0.3);
+    doc.rect(M, imgY, imgW, imgH);
+
+    // 画像右下ウォーターマーク
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(180, 175, 165);
+    doc.text('渡部製作所 × PerspectAI', PW - M, imgY + imgH - 2, { align: 'right' });
+
+    // ── 注記・備考エリア ──
+    const noteY = imgY + imgH + 8;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(14, 14, 12);
+    doc.text('■ ご注意・備考', M, noteY);
+
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(110, 105, 95);
+    doc.setFontSize(7.5);
+    const notes = [
+      '・本パースは AI による自動推論イメージであり、実際の仕上がりとは異なる場合があります。',
+      '・外壁材・屋根材・植栽等の最終仕様は、設計士との打ち合わせにてご確認ください。',
+      '・本資料は商談の参考資料としてのみご使用ください。'
+    ];
+    notes.forEach((line, i) => {
+      doc.text(line, M, noteY + 6 + i * 5.5);
+    });
+
+    // ── フッター ──
+    doc.setDrawColor(200, 195, 185);
+    doc.setLineWidth(0.3);
+    doc.line(M, PH - 16, PW - M, PH - 16);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(160, 155, 145);
+    doc.text('株式会社渡部製作所  |  札幌市清田区', M, PH - 10);
+    doc.text(`PerspectAI — 生成日時: ${dateStr}`, PW - M, PH - 10, { align: 'right' });
+
+    // 出力
+    const fileName = `PerspectAI_提案書_${styleLabel[state.style]}_${dateStr.replace(/年|月/g,'-').replace('日','')}.pdf`;
+    doc.save(fileName);
+    toast('PDF 提案書を保存しました。');
+
+  } catch (e) {
+    console.error('PDF生成エラー:', e);
+    toast('PDF 生成中にエラーが発生しました。JPEG 保存をお試しください。');
+  } finally {
+    btn.innerHTML = '<svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4h6M4 7h6M4 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> PDF 提案書を出力';
+    btn.disabled = false;
+  }
 }
+
 function regenerate() {
   document.getElementById('generate-btn').click();
 }
