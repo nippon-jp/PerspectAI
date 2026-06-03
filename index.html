@@ -1037,9 +1037,17 @@
       <div class="prompt-bar-icon">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="white" stroke-width="1.1"/><path d="M4 7h6M4 4.5h6M4 9.5h4" stroke="white" stroke-width="1" stroke-linecap="round" opacity="0.5"/></svg>
       </div>
-      <div>
-        <div class="prompt-bar-label">AI 自動最適化プロンプト <span class="prompt-tag">日本街並み対応</span></div>
+      <div style="flex:1;min-width:0;">
+        <div class="prompt-bar-label">
+          AI 自動最適化プロンプト
+          <span class="prompt-tag">日本街並み対応</span>
+          <span id="vision-badge" style="display:none;font-size:10px;background:rgba(46,107,79,0.3);color:#7dd9a8;border:1px solid rgba(46,107,79,0.4);padding:1px 7px;border-radius:3px;margin-left:6px;">
+            ✦ Claude Vision 解析済
+          </span>
+        </div>
         <div class="prompt-text" id="prompt-display">"A high-end modern Japanese house, black metallic vertical siding facade, natural wood grain accents, dynamic mono-pitch roof, sunny summer day, crisp blue sky, lush curated garden, cinematic architectural photography."</div>
+        <!-- Vision解析サマリー（解析後に表示） -->
+        <div id="vision-summary" style="display:none;margin-top:8px;display:none;flex-wrap:wrap;gap:6px;" aria-live="polite"></div>
       </div>
     </div>
 
@@ -1067,17 +1075,17 @@
           <div class="loading-steps">
             <div class="lstep active" id="lstep-1">
               <div class="lstep-num">1</div>
-              <span>図面の線画・外形線抽出</span>
+              <span id="lstep-1-label">図面の線画・外形線抽出</span>
               <div class="lstep-ping"></div>
             </div>
             <div class="lstep" id="lstep-2">
               <div class="lstep-num">2</div>
-              <span>デザイン・環境プロンプト合成</span>
+              <span id="lstep-2-label">デザイン・環境プロンプト合成</span>
               <div class="lstep-ping"></div>
             </div>
             <div class="lstep" id="lstep-3">
               <div class="lstep-num">3</div>
-              <span>AI 高精度パースレンダリング</span>
+              <span id="lstep-3-label">AI 高精度パースレンダリング</span>
               <div class="lstep-ping"></div>
             </div>
           </div>
@@ -1163,22 +1171,37 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div class="modal-desc">
-      APIキーを入力すると Imagen 4.0 によるリアルタイム高解像度パースを生成できます。空欄の場合は高品質な模擬パース（全スタイル・環境差分対応）が表示されます。
+
+    <!-- Claude Vision セクション -->
+    <div style="background:var(--accent-pale);border:1px solid rgba(200,121,58,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6.5" stroke="var(--accent)" stroke-width="1.3"/><circle cx="7.5" cy="7.5" r="2.5" fill="var(--accent)"/><path d="M1 7.5h2M12 7.5h2M7.5 1v2M7.5 12v2" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span style="font-size:12px;font-weight:500;color:var(--accent-dark);">Claude Vision 図面解析（推奨）</span>
+        <span style="font-size:10px;background:var(--accent);color:#fff;padding:2px 7px;border-radius:3px;">NEW</span>
+      </div>
+      <p style="font-size:11px;color:var(--ink-60);line-height:1.65;margin-bottom:12px;">アップロードした図面画像を Claude が視覚的に解析し、屋根形状・階数・開口部・外壁特徴などを自動抽出します。抽出した情報を画像生成プロンプトに忠実に反映させることで、設計意図に近いパースを生成します。</p>
+      <label class="form-label" style="color:var(--accent-dark);">Anthropic APIキー（Claude claude-sonnet-4-20250514）</label>
+      <input type="password" id="anthropic-key-input" class="form-input" placeholder="sk-ant-api03-...">
+      <div class="form-note">※ キー未設定でも図面の形状分類は基本動作します。Visionを有効にすると解析精度が大幅に向上します。</div>
     </div>
-    <div style="margin-bottom:14px;">
-      <label class="form-label">Gemini / Vertex AI APIキー</label>
-      <input type="password" id="api-key-input" class="form-input" placeholder="AI-zaSy...">
-      <div class="form-note">入力されたキーはブラウザ内のみで使用され、サーバーには保存されません。</div>
+
+    <div style="border-top:1px solid var(--ink-10);padding-top:16px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:500;color:var(--ink-60);letter-spacing:0.04em;margin-bottom:12px;">画像生成 AI（オプション）</div>
+      <div style="margin-bottom:14px;">
+        <label class="form-label">Gemini / Vertex AI APIキー</label>
+        <input type="password" id="api-key-input" class="form-input" placeholder="AI-zaSy...">
+        <div class="form-note">設定すると Imagen 4.0 でリアルタイム高解像度パースを生成します。未設定時は高品質な模擬パースを表示します。</div>
+      </div>
+      <div>
+        <label class="form-label">画像生成解像度</label>
+        <select class="select-native" id="resolution-select">
+          <option value="1:1">正方形（1024×1024）</option>
+          <option value="4:3" selected>スタンダード（1024×768 — タブレット最適）</option>
+          <option value="16:9">ワイド（1280×720）</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label class="form-label">画像生成解像度</label>
-      <select class="select-native" id="resolution-select">
-        <option value="1:1">正方形（1024×1024）</option>
-        <option value="4:3" selected>スタンダード（1024×768 — タブレット最適）</option>
-        <option value="16:9">ワイド（1280×720）</option>
-      </select>
-    </div>
+
     <div class="modal-footer">
       <button class="btn-save" id="save-api">設定を保存</button>
     </div>
@@ -1212,7 +1235,9 @@ let state = {
   season: 'summer',
   uploadedBase64: null,
   uploadedPageCount: null,
-  apiKey: '',
+  apiKey: '',           // Gemini / Imagen
+  anthropicKey: '',     // Claude Vision
+  visionAnalysis: null, // Claude が解析した図面情報（構造化JSON）
 };
 
 // Mock architectural images (Unsplash)
@@ -1264,8 +1289,10 @@ document.getElementById('tab-upload-btn').addEventListener('click',()=>{
 function selectDrawing(id) {
   state.drawing = id;
   state.uploadedBase64 = null;
-  document.querySelectorAll('.drawing-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('dc-'+id).classList.add('selected');
+  state.visionAnalysis = null;
+  applyVisionAnalysis(null);
+  document.querySelectorAll('.drawing-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('dc-' + id).classList.add('selected');
   updateBeforeLayer();
   updatePrompt();
 }
@@ -1313,6 +1340,11 @@ async function handleFile(file) {
     await processPDF(file);
   } else {
     await processImage(file);
+  }
+
+  // Anthropic APIキーが設定済みなら図面を即座に解析
+  if (state.anthropicKey && state.uploadedBase64) {
+    preAnalyzeUpload();
   }
 }
 
@@ -1448,32 +1480,83 @@ document.getElementById('season-select').addEventListener('change', e=>{
 
 // ── PROMPT GENERATION ──
 function buildPrompt() {
-  let p = 'A highly detailed architectural visualization of a luxury ';
-  const styleMap = {
-    modern: 'contemporary Japanese house. Black metallic matte vertical siding, sleek natural teak wood soffit accents, flat mono-pitch metal roof.',
-    japanese: 'wabi-sabi modern Japanese house. Light shikkui plaster walls, vertical cedar wooden slat screens, traditional dark ceramic tile roof.',
-    nordic: 'Nordic Scandinavian house. Off-white wood panel siding, warm brick accent chimney, high-pitched gabled roof, minimalist black-framed windows.',
-    california: 'coastal California beach house. Pale ocean blue horizontal wooden siding, white covered porch veranda, glass balustrades.'
+  const va = state.visionAnalysis; // Claude Vision 解析結果
+
+  let p = 'A highly detailed, photorealistic architectural visualization of a luxury ';
+
+  // ── 屋根・形状（Vision優先）──
+  if (va?.roof_type) {
+    const roofMap = {
+      'flat': 'flat metal roof',
+      'mono-pitch': 'dynamic mono-pitch cantilevered metal roof',
+      'gabled': 'classic double-gabled pitched roof',
+      'hip': 'elegant hip roof with wide overhanging eaves',
+      'shed': 'modern shed-style sloped roof',
+    };
+    const roofDesc = roofMap[va.roof_type] || va.roof_type;
+    p += `${va.stories || 'multi'}-story contemporary Japanese residential house featuring a ${roofDesc}. `;
+  } else {
+    p += 'contemporary Japanese single-family house. ';
+  }
+
+  // ── 外壁・材質（Vision優先 → スタイル設定へフォールバック）──
+  if (va?.facade_features?.length) {
+    p += `Facade: ${va.facade_features.join(', ')}. `;
+  } else {
+    const styleMap = {
+      modern:     'Black metallic matte vertical siding, sleek natural teak wood soffit accents.',
+      japanese:   'Light shikkui plaster walls, vertical cedar wooden slat screens, traditional dark ceramic tile roof.',
+      nordic:     'Off-white wood panel siding, warm brick accent chimney, minimalist black-framed windows.',
+      california: 'Pale ocean blue horizontal wooden siding, white covered porch veranda, glass balustrades.'
+    };
+    p += styleMap[state.style] + ' ';
+  }
+
+  // ── 開口部（Vision解析がある場合のみ追加）──
+  if (va?.openings) {
+    p += `${va.openings} `;
+  }
+
+  // ── 特記事項（ガレージ・バルコニーなど）──
+  if (va?.notable_features?.length) {
+    p += `Notable architectural elements: ${va.notable_features.join(', ')}. `;
+  }
+
+  // ── スタイル補足（Visionがあってもスタイル設定の雰囲気は乗せる）──
+  const styleMoodMap = {
+    modern:     'Sleek minimalist Japanese contemporary aesthetic.',
+    japanese:   'Wabi-sabi Japanese modern warmth and harmony.',
+    nordic:     'Scandinavian cozy Nordic warmth.',
+    california: 'Relaxed coastal California open-living feel.'
   };
-  p += styleMap[state.style] + ' ';
+  p += styleMoodMap[state.style] + ' ';
+
+  // ── ライティング ──
   const lightMap = {
-    day: 'Bright mid-day sunlight, crisp blue sky, sharp cast shadows.',
-    sunset: 'Dramatic warm sunset glow, golden hour shadows, orange and pink clouds.',
-    night: 'Elegant evening scene, exterior architectural spotlighting, warm glow from indoor windows.'
+    day:    'Bright mid-day sunlight, crisp blue sky, sharp volumetric cast shadows.',
+    sunset: 'Dramatic warm sunset glow, golden hour long shadows, sky filled with orange and pink clouds.',
+    night:  'Elegant evening scene, dramatic exterior architectural spotlighting, warm amber glow from interior windows.'
   };
   p += lightMap[state.lighting] + ' ';
+
+  // ── 外構 ──
   const landMap = {
-    rich: 'Lush curated garden with a tall symbolic maple tree, stone pavement driveway, pathway lighting.',
-    minimal: 'Sleek concrete driveway, minimalist landscape, single statement pine shrub.'
+    rich:    'Lush curated Japanese garden with a tall symbolic maple tree, stone pavement driveway, delicate pathway lanterns.',
+    minimal: 'Sleek architectural concrete driveway, minimalist low-maintenance landscape, single statement pine shrub.'
   };
   p += landMap[state.landscape] + ' ';
+
+  // ── 季節 ──
   const seasonMap = {
-    spring: 'Spring morning, fresh green leaves, subtle cherry blossom petals.',
-    summer: 'Bright lush summer, rich green foliage, intense clean sunlight.',
-    autumn: 'Gentle autumn, warm lighting, gold and crimson leaves.',
-    winter: 'Crisp winter sky, bare branches, cold morning air.'
+    spring: 'Beautiful spring morning, fresh new green leaves, very subtle cherry blossom petals floating in the air.',
+    summer: 'Bright lush summer day, rich deep green foliage, intense clean sunlight with vivid contrasts.',
+    autumn: 'Gentle autumn afternoon, warm soft light, trees in brilliant gold, crimson and amber leaves.',
+    winter: 'Crisp clear winter sky, wispy high-altitude clouds, bare deciduous branches against cold morning air.'
   };
-  p += seasonMap[state.season] + ' Photorealistic, 35mm architectural photography, sharp focus.';
+  p += seasonMap[state.season] + ' ';
+
+  p += 'Shot on professional 35mm architectural camera, tack-sharp focus, extremely high fidelity textures of wood, concrete, glass and metal.';
+
   return p;
 }
 
@@ -1509,62 +1592,261 @@ function moveSlider(e) {
   setSliderPos(pct);
 }
 
+// ── CLAUDE VISION 図面解析 ──
+
+// 図面画像を base64（data URL）→ base64データのみ に変換
+function dataUrlToBase64(dataUrl) {
+  return dataUrl.split(',')[1];
+}
+function dataUrlMimeType(dataUrl) {
+  return dataUrl.match(/data:([^;]+);/)?.[1] || 'image/jpeg';
+}
+
+async function analyzeDrawingWithClaude(imageBase64Url) {
+  if (!state.anthropicKey) return null;
+
+  const base64Data = dataUrlToBase64(imageBase64Url);
+  const mediaType  = dataUrlMimeType(imageBase64Url);
+
+  const systemPrompt = `You are an expert architectural drawing analyzer. Your task is to examine building elevation drawings, floor plans, and architectural blueprints, then extract structured information to be used for 3D photorealistic architectural rendering prompts.
+
+Always respond with ONLY valid JSON, no preamble, no markdown fences. The JSON must have exactly these fields:
+{
+  "roof_type": string,         // one of: "flat", "mono-pitch", "gabled", "hip", "shed", "curved", "unknown"
+  "stories": string,           // e.g. "1-story", "2-story", "3-story", "unknown"
+  "openings": string,          // natural language: e.g. "Large panoramic windows on ground floor, narrow vertical windows on upper floor, a recessed front entrance"
+  "facade_features": string[], // array of facade material/design features, e.g. ["vertical wood siding", "horizontal concrete band", "deep overhang eaves"]
+  "notable_features": string[],// array of standout architectural elements, e.g. ["attached garage", "cantilevered upper floor", "wraparound deck", "inner courtyard"]
+  "building_width": string,    // "narrow", "standard", "wide", or "very wide"
+  "drawing_type": string,      // "elevation", "floor_plan", "section", "mixed", "unclear"
+  "confidence": string         // "high", "medium", "low" — your overall reading confidence
+}`;
+
+  const userPrompt = `Please analyze this architectural drawing carefully. Extract all visible structural and design features. Focus especially on: roof shape, number of floors, window/door placement and size, facade materials suggested by drawing conventions, and any special architectural elements like garages, balconies, or cantilevers.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': state.anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: systemPrompt,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: mediaType, data: base64Data }
+            },
+            { type: 'text', text: userPrompt }
+          ]
+        }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message || `API error ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const rawText = data.content?.[0]?.text || '';
+
+    // JSON部分だけ抽出（```json ... ``` があっても安全にパース）
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    return parsed;
+
+  } catch (e) {
+    console.warn('Claude Vision 解析エラー:', e.message);
+    return null;
+  }
+}
+
+// Vision解析結果をUIに反映
+function applyVisionAnalysis(va) {
+  if (!va) {
+    document.getElementById('vision-badge').style.display = 'none';
+    document.getElementById('vision-summary').style.display = 'none';
+    return;
+  }
+
+  // バッジ表示
+  document.getElementById('vision-badge').style.display = 'inline';
+
+  // サマリーチップ
+  const chips = [];
+  if (va.roof_type && va.roof_type !== 'unknown')   chips.push({ icon:'🏠', text: va.roof_type + ' roof' });
+  if (va.stories && va.stories !== 'unknown')        chips.push({ icon:'🏢', text: va.stories });
+  if (va.building_width)                             chips.push({ icon:'↔', text: va.building_width });
+  if (va.drawing_type && va.drawing_type !== 'unclear') chips.push({ icon:'📐', text: va.drawing_type });
+  if (va.confidence)                                 chips.push({ icon:'✦', text: 'confidence: ' + va.confidence });
+
+  const summaryEl = document.getElementById('vision-summary');
+  summaryEl.innerHTML = chips.map(c =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:3px;padding:2px 8px;font-size:10px;color:rgba(255,255,255,0.65);">${c.icon} ${c.text}</span>`
+  ).join('');
+  summaryEl.style.display = chips.length ? 'flex' : 'none';
+
+  // プロンプトを即時更新
+  updatePrompt();
+}
+
+// アップロードされた図面の事前解析（ファイル確定後に呼び出す）
+async function preAnalyzeUpload() {
+  if (!state.uploadedBase64 || !state.anthropicKey) return;
+
+  // 以前の解析をクリア
+  state.visionAnalysis = null;
+  applyVisionAnalysis(null);
+
+  // 軽量なローカルフィードバック
+  document.getElementById('vision-badge').style.display = 'inline';
+  document.getElementById('vision-badge').textContent = '⏳ 図面解析中…';
+
+  const result = await analyzeDrawingWithClaude(state.uploadedBase64);
+  state.visionAnalysis = result;
+
+  if (result) {
+    document.getElementById('vision-badge').textContent = '✦ Claude Vision 解析済';
+    applyVisionAnalysis(result);
+    toast(`図面解析完了 — ${result.roof_type} roof, ${result.stories}, confidence: ${result.confidence}`);
+  } else {
+    document.getElementById('vision-badge').style.display = 'none';
+  }
+}
+
 // ── GENERATE ──
-document.getElementById('generate-btn').addEventListener('click', async ()=>{
+document.getElementById('generate-btn').addEventListener('click', async () => {
   const se = document.getElementById('state-empty');
   const sl = document.getElementById('state-loading');
   const sr = document.getElementById('state-result');
-  se.style.display='none'; sr.style.display='none'; sl.style.display='block';
+  se.style.display = 'none'; sr.style.display = 'none'; sl.style.display = 'block';
   sl.classList.remove('fade-in'); void sl.offsetWidth; sl.classList.add('fade-in');
-  resetSteps();
 
+  const hasUpload    = !!state.uploadedBase64;
+  const hasVisionKey = !!state.anthropicKey;
+  const useVision    = hasUpload && hasVisionKey;
+
+  resetSteps(useVision);
   const t0 = Date.now();
-  await simulateStep1();
-  advanceStep(1,2,'デザインプロンプト合成中…','Gemini 2.5 Flash が希望の外壁材・時間帯などの詳細プロンプトを構築しています。');
-  await sleep(1400);
-  advanceStep(2,3,'AI 高精度パースレンダリング中…','Imagen 4.0 を起動。外壁・空・植栽などを超高精細に合成しています。');
-  await sleep(state.apiKey ? 0 : 2200);
 
+  // ── Step 1：図面解析（Vision あり / なし で分岐）──
+  if (useVision) {
+    setStepDesc('loading-title', 'Claude Vision で図面を解析中…');
+    setStepDesc('loading-desc', '屋根形状・階数・開口部・外壁特徴などを Claude が視覚的に読み取っています。');
+    const va = await analyzeDrawingWithClaude(state.uploadedBase64);
+    state.visionAnalysis = va;
+    applyVisionAnalysis(va);
+    if (!va) {
+      setStepDesc('loading-desc', '解析に失敗しました。スタイル設定でプロンプトを構築します。');
+    }
+  } else {
+    // APIキーなし or サンプル図面 → 軽量なCanvas処理
+    setStepDesc('loading-title', '図面の輪郭を解析中…');
+    setStepDesc('loading-desc', '住宅の形状を崩さずパース化するためのエッジ線を抽出しています。');
+    await simulateStep1();
+  }
+
+  // ── Step 2：プロンプト合成 ──
+  advanceStep(1, 2,
+    'デザインプロンプトを合成中…',
+    useVision && state.visionAnalysis
+      ? `Claude が抽出した「${state.visionAnalysis.roof_type} roof / ${state.visionAnalysis.stories}」をプロンプトに反映しています。`
+      : 'スタイル設定・時間帯・外構の情報からプロンプトを構築しています。'
+  );
+  updatePrompt(); // Visionデータを反映したプロンプトをバーに表示
+  await sleep(1200);
+
+  // ── Step 3：画像レンダリング ──
+  advanceStep(2, 3,
+    'AI 高精度パースレンダリング中…',
+    'Imagen 4.0 を起動。外壁・空・植栽などを超高精細に合成しています。'
+  );
+  await sleep(state.apiKey ? 0 : 2000);
+
+  // 画像をセット（APIキーあり → Imagen、なし → モック）
   const imgUrl = getMockImage();
   document.getElementById('after-img').src = imgUrl;
   updateBeforeLayer();
   setSliderPos(50);
-  const elapsed = ((Date.now()-t0)/1000).toFixed(1);
-  document.getElementById('render-time').textContent = `生成時間: ${elapsed}秒`;
+
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  const visionLabel = useVision && state.visionAnalysis ? ' (Vision 解析込み)' : '';
+  document.getElementById('render-time').textContent = `生成時間: ${elapsed}秒${visionLabel}`;
 
   doneStep(3);
   await sleep(300);
-  sl.style.display='none';
-  sr.style.display='block';
+  sl.style.display = 'none';
+  sr.style.display = 'block';
   sr.classList.remove('fade-in'); void sr.offsetWidth; sr.classList.add('fade-in');
 });
 
 function getMockImage() {
-  const sg = MOCKS[state.style]||MOCKS.modern;
-  const lg = sg[state.lighting]||sg.day;
-  return lg[state.landscape]||lg.rich;
+  const sg = MOCKS[state.style] || MOCKS.modern;
+  const lg = sg[state.lighting] || sg.day;
+  return lg[state.landscape] || lg.rich;
 }
 
-function resetSteps() {
-  ['lstep-1','lstep-2','lstep-3'].forEach(id=>{
+function setStepDesc(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function resetSteps(useVision = false) {
+  ['lstep-1','lstep-2','lstep-3'].forEach(id => {
     const el = document.getElementById(id);
-    el.className='lstep';
+    el.className = 'lstep';
+    // ステップ番号を数字に戻す
+    const numEl = el.querySelector('.lstep-num');
+    if (numEl) numEl.innerHTML = id.replace('lstep-','');
   });
   document.getElementById('lstep-1').classList.add('active');
-  document.getElementById('loading-title').textContent='図面の輪郭を解析中…';
-  document.getElementById('loading-desc').textContent='住宅の形状を崩さずパース化するためのエッジ線を抽出しています。';
+
+  // Step1ラベル：Visionモードか否かで変える
+  const step1Label = document.getElementById('lstep-1-label');
+  if (step1Label) {
+    step1Label.textContent = useVision
+      ? 'Claude Vision — 図面の形状・仕様を解析'
+      : '図面の線画・外形線抽出';
+  }
+  const step2Label = document.getElementById('lstep-2-label');
+  if (step2Label) {
+    step2Label.textContent = useVision
+      ? '解析結果をプロンプトへ反映・合成'
+      : 'デザイン・環境プロンプト合成';
+  }
+  const step3Label = document.getElementById('lstep-3-label');
+  if (step3Label) step3Label.textContent = 'AI 高精度パースレンダリング';
+
+  setStepDesc('loading-title', useVision ? 'Claude Vision で図面を解析中…' : '図面の輪郭を解析中…');
+  setStepDesc('loading-desc', useVision
+    ? '屋根形状・階数・開口部・外壁特徴などを Claude が視覚的に読み取っています。'
+    : '住宅の形状を崩さずパース化するためのエッジ線を抽出しています。');
 }
+
 function advanceStep(from, to, title, desc) {
   doneStep(from);
-  const el = document.getElementById('lstep-'+to);
-  el.classList.add('active');
-  document.getElementById('loading-title').textContent=title;
-  document.getElementById('loading-desc').textContent=desc;
+  const el = document.getElementById('lstep-' + to);
+  if (el) el.classList.add('active');
+  setStepDesc('loading-title', title);
+  setStepDesc('loading-desc', desc);
 }
+
 function doneStep(n) {
-  const el = document.getElementById('lstep-'+n);
-  el.classList.remove('active'); el.classList.add('done');
-  el.querySelector('.lstep-num').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const el = document.getElementById('lstep-' + n);
+  if (!el) return;
+  el.classList.remove('active');
+  el.classList.add('done');
+  el.querySelector('.lstep-num').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
 
 async function simulateStep1() {
@@ -1602,20 +1884,35 @@ function regenerate() {
 }
 
 // ── API MODAL ──
-document.getElementById('api-config-btn').addEventListener('click',()=>{
-  document.getElementById('api-key-input').value=state.apiKey;
+document.getElementById('api-config-btn').addEventListener('click', () => {
+  document.getElementById('api-key-input').value = state.apiKey;
+  document.getElementById('anthropic-key-input').value = state.anthropicKey;
   document.getElementById('api-modal').classList.add('open');
 });
-document.getElementById('close-modal').addEventListener('click',()=>{
+document.getElementById('close-modal').addEventListener('click', () => {
   document.getElementById('api-modal').classList.remove('open');
 });
-document.getElementById('save-api').addEventListener('click',()=>{
-  state.apiKey=document.getElementById('api-key-input').value.trim();
+document.getElementById('save-api').addEventListener('click', () => {
+  state.apiKey       = document.getElementById('api-key-input').value.trim();
+  state.anthropicKey = document.getElementById('anthropic-key-input').value.trim();
   document.getElementById('api-modal').classList.remove('open');
-  toast(state.apiKey?'Gemini API キーを設定しました。':'APIキーをクリアしました。模擬モードで動作します。');
+
+  const msgs = [];
+  if (state.anthropicKey) msgs.push('Claude Vision 有効');
+  if (state.apiKey)       msgs.push('Imagen 4.0 有効');
+  if (msgs.length) {
+    toast('API設定を保存しました — ' + msgs.join(' · '));
+  } else {
+    toast('APIキーをクリアしました。模擬モードで動作します。');
+  }
+
+  // Anthropicキーが新たに設定され、かつ図面がアップロード済みなら即解析
+  if (state.anthropicKey && state.uploadedBase64) {
+    preAnalyzeUpload();
+  }
 });
-document.getElementById('api-modal').addEventListener('click',e=>{
-  if(e.target===e.currentTarget) document.getElementById('api-modal').classList.remove('open');
+document.getElementById('api-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('api-modal').classList.remove('open');
 });
 
 // ── TOAST ──
